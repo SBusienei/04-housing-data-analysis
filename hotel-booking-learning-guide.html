@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A practical beginner's guide to hotel cancellation analysis, SQL, segmentation, honest model evaluation, and resume writing.">
+  <title>From booking data to business decisions | Practical learning guide</title>
+  <style>
+    :root { --ink:#142c39; --muted:#526874; --paper:#fff; --bg:#f2f5f4; --teal:#086f68; --line:#d8e2df; --gold:#a45c06; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; scroll-padding-top:24px; }
+    body { margin:0; color:var(--ink); background:var(--bg); font:17px/1.75 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    a { color:var(--teal); text-underline-offset:3px; }
+    a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline:3px solid #b66b00; outline-offset:4px; }
+    .skip { position:absolute; left:12px; top:-80px; background:white; padding:12px; z-index:5; }
+    .skip:focus { top:12px; }
+    .layout { max-width:1420px; margin:auto; display:grid; grid-template-columns:260px minmax(0,1fr); gap:40px; padding:36px 36px 80px; }
+    aside { position:sticky; top:24px; align-self:start; max-height:calc(100vh - 48px); overflow:auto; font-size:14px; }
+    .brand { font-weight:800; letter-spacing:.12em; font-size:12px; color:var(--teal); margin:0 0 16px; }
+    nav a { display:block; padding:7px 10px; text-decoration:none; border-left:2px solid var(--line); }
+    nav a:hover { background:#e1eeea; border-color:var(--teal); }
+    .print-button { border:0; border-radius:8px; background:var(--teal); color:white; padding:12px 18px; font:inherit; font-weight:650; cursor:pointer; margin:20px 0 8px; }
+    .small { font-size:14px; color:var(--muted); }
+    main { min-width:0; }
+    header { background:var(--ink); color:white; border-radius:18px; padding:48px; margin-bottom:28px; }
+    .eyebrow { text-transform:uppercase; font-weight:750; font-size:12px; letter-spacing:.16em; color:#94e1c9; }
+    h1 { font-size:clamp(34px,4vw,54px); line-height:1.13; letter-spacing:-.035em; margin:18px 0 24px; }
+    header p { color:#d5e7e8; max-width:680px; }
+    .tags { display:flex; flex-wrap:wrap; gap:8px; }
+    .tags span { border:1px solid #56747f; padding:4px 11px; border-radius:30px; font-size:12px; color:#e7f7f1; }
+    section { background:var(--paper); padding:36px 42px; border:1px solid var(--line); border-radius:14px; margin:0 0 24px; }
+    h2 { font-size:29px; line-height:1.25; letter-spacing:-.025em; margin:6px 0 22px; }
+    h3 { font-size:21px; line-height:1.4; margin:30px 0 10px; }
+    h4 { font-size:17px; margin:22px 0 8px; }
+    p { margin:10px 0 16px; }
+    li { margin:6px 0; }
+    .chapter { font-size:12px; font-weight:800; color:var(--teal); letter-spacing:.13em; text-transform:uppercase; }
+    .callout { padding:18px 22px; background:#edf7f3; border-left:4px solid var(--teal); border-radius:0 8px 8px 0; margin:22px 0; }
+    .warning { background:#fff6e6; border-left-color:var(--gold); }
+    .example { font-size:12px; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:.07em; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .card { border:1px solid var(--line); padding:18px; border-radius:10px; }
+    .card h3 { margin-top:0; }
+    .table-wrap { overflow-x:auto; }
+    table { border-collapse:collapse; width:100%; font-size:14px; margin:18px 0; }
+    th { text-align:left; background:#edf3f1; font-weight:750; }
+    td,th { padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+    caption { text-align:left; color:var(--muted); font-size:13px; margin-bottom:8px; }
+    pre { background:#102a36; color:#e7f3f5; padding:20px; border-radius:9px; overflow-x:auto; font:13px/1.65 Consolas,"Courier New",monospace; tab-size:4; }
+    code { font: .88em Consolas,"Courier New",monospace; overflow-wrap:anywhere; }
+    :not(pre) > code { background:#edf2f2; padding:2px 5px; border-radius:4px; }
+    pre code { font:inherit; overflow-wrap:normal; }
+    .formula { font-size:18px; font-weight:650; padding:16px 20px; border:1px dashed #91aaa5; border-radius:8px; background:#fafcfb; }
+    details { border:1px solid var(--line); border-radius:8px; padding:14px 18px; margin:16px 0; }
+    summary { cursor:pointer; font-weight:700; color:var(--teal); }
+    .checkpoint { border-top:1px solid var(--line); padding-top:16px; margin-top:24px; }
+    .checkpoint strong { color:var(--teal); }
+    .exercise { background:#f6f7fb; padding:18px; border-radius:8px; }
+    label { display:block; margin:12px 0; }
+    input { width:100px; padding:8px; margin-left:8px; font:inherit; border:1px solid #879e99; border-radius:5px; }
+    output { display:block; margin-top:14px; padding:14px; background:#e4f2ee; border-radius:7px; font-weight:650; }
+    footer { color:var(--muted); font-size:14px; padding:12px; }
+    @media(max-width:1000px) { .layout { grid-template-columns:210px minmax(0,1fr); gap:20px; padding:20px; } section { padding:28px; } header { padding:34px; } }
+    @media(max-width:760px) { .layout { display:block; padding:14px; } aside { position:static; max-height:none; margin-bottom:24px; } nav { columns:2; } nav a { break-inside:avoid; } section { padding:24px 20px; } header { padding:30px 24px; } .grid { grid-template-columns:1fr; } body { font-size:16px; } }
+    @page { size:A4; margin:17mm 15mm; }
+    @media print {
+      html { scroll-behavior:auto; }
+      body { background:white; color:#172b35; font-size:10pt; line-height:1.55; }
+      .layout { display:block; max-width:none; padding:0; }
+      aside,.no-print,.skip { display:none !important; }
+      header { background:white; color:#142c39; padding:0 0 20px; border-radius:0; border-bottom:3px solid #086f68; }
+      header p,header .eyebrow { color:#304c56; }
+      .tags span { color:#304c56; border-color:#aabbb5; }
+      h1 { font-size:32pt; }
+      section { border:0; border-radius:0; padding:12px 0; margin:0; break-before:page; }
+      h2 { font-size:22pt; } h3 { font-size:14pt; } h4 { font-size:11pt; }
+      h2,h3,h4,summary,caption { break-after:avoid; }
+      p,li { orphans:3; widows:3; }
+      pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#f0f3f3; color:#142c39; border:1px solid #c8d6d2; font-size:8pt; padding:12px; }
+      .table-wrap { overflow:visible; }
+      table { font-size:8.5pt; } thead { display:table-header-group; } tr { break-inside:avoid; }
+      td,th { padding:7px; } .callout,.card,.exercise,details { break-inside:avoid; }
+      details > * { display:block !important; } summary { list-style:none; }
+      .grid { display:block; } .card { margin:12px 0; }
+      a { color:#142c39; } .print-note { font-size:9pt; }
+      * { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+    }
+  </style>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to the guide</a>
+<div class="layout">
+  <aside aria-label="Guide navigation">
+    <p class="brand">THE PRACTICAL DATA NOTEBOOK</p>
+    <nav aria-label="Chapters">
+      <a href="#start">01 / How to use this guide</a>
+      <a href="#business">02 / The business problem</a>
+      <a href="#data">03 / Understand a booking</a>
+      <a href="#setup">04 / Tools and project setup</a>
+      <a href="#quality">05 / Phase 1: Data quality</a>
+      <a href="#sql">06 / Phase 2: SQL analysis</a>
+      <a href="#segments">07 / Phase 3: Segmentation</a>
+      <a href="#model">08 / Phase 4: Risk modeling</a>
+      <a href="#metrics">09 / Understand the metrics</a>
+      <a href="#dashboard">10 / Phase 5: Dashboard data</a>
+      <a href="#writing">11 / Phase 6: Write-up</a>
+      <a href="#engineering">12 / Good project habits</a>
+      <a href="#walkthrough">13 / A complete worked story</a>
+      <a href="#resume">14 / Resume and interviews</a>
+      <a href="#glossary">15 / Glossary and next steps</a>
+      <a href="#do-later">16 / Commands to run later</a>
+    </nav>
+    <button class="print-button" type="button" id="print-guide">Print / Save as PDF</button>
+    <p class="small">In the print dialog, choose <strong>Save as PDF</strong>. A4 layout is built in. Expandable answers are included when printing.</p>
+  </aside>
+  <main id="guide">
+    <header>
+      <div class="eyebrow">A learn-by-doing companion</div>
+      <h1>From booking data<br>to business decisions.</h1>
+      <p>A step-by-step explanation of your hotel cancellation project, with small datasets, worked calculations, SQL, Python, exercises, and honest resume language.</p>
+      <div class="tags"><span>Beginner friendly</span><span>SQL first</span><span>Six project phases</span><span>Practical examples</span><span>Print ready</span></div>
+      <p class="print-note"><strong>Document status:</strong> educational guide, not a completed analysis. No Kaggle data has been loaded, no project model has been trained, and no dataset results are claimed.</p>
+    </header>
+
+    <section id="start">
+      <div class="chapter">01 / Start here</div>
+      <h2>What you are getting, and how to read it</h2>
+      <p>Your original prompt is a specification: it tells an assistant what to build, in what order, and what standards to follow. This guide explains that specification. It does <strong>not</strong> silently execute all six phases or skip your review checkpoints.</p>
+      <div class="callout"><strong>Your implementation uses PostgreSQL + DBeaver.</strong> PostgreSQL is the database engine; DBeaver is your visual SQL client. Starter code for all phases is prepared, but your real-data work is not executed. Follow <a href="README.md">README.md</a> for the project overview and reproduction steps. The final chapter of this PDF includes manual commands and review gates. No commit or push is performed automatically; your recommendation content remains yours.</div>
+      <div class="callout warning"><strong>Numbers policy.</strong> Every numeric booking example or model score below is explicitly fictional teaching material. Actual project findings must use placeholders such as <code>[RESULT: overall cancellation rate]</code> until computed and verified. Dates, code constants, phase numbers, and exercise inputs are not claimed findings.</div>
+      <h3>A useful way to study</h3>
+      <ol>
+        <li>Read the business question before looking at code.</li>
+        <li>Work through the tiny eight-booking example by hand.</li>
+        <li>Read the SQL and explain each line aloud.</li>
+        <li>Try the exercise before opening its answer.</li>
+        <li>At the end of each phase, use its review checklist before moving on.</li>
+      </ol>
+      <p><strong>Examples versus implementation:</strong> code snippets explain individual ideas. Unless labeled self-contained, they assume the tables or variables described nearby. They are not a complete production pipeline. The proposed file layout is an example, not a set of files already created.</p>
+      <div class="grid">
+        <div class="card"><h3>Your role</h3><p>Download the dataset, review each phase, decide how you want the dashboard to look, and write the recommendations yourself.</p></div>
+        <div class="card"><h3>The assistant's role</h3><p>Implement the agreed phase, explain decisions, document assumptions, make results reproducible, and stop for your review.</p></div>
+      </div>
+      <p><strong>What success looks like:</strong> you can explain what each output means, how it was produced, and what it cannot prove. That is more valuable than a repository full of code you cannot defend in an interview.</p>
+    </section>
+
+    <section id="business">
+      <div class="chapter">02 / Business framing</div>
+      <h2>Start with a decision, not a model</h2>
+      <p>A cancellation affects planning. A hotel may hold a room for someone who later cancels, while demand from other guests changes. An operations team needs visibility into likely cancellations, but it must also avoid treating reliable guests unfairly.</p>
+      <h3>Three different questions</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Question</th><th>Kind of work</th><th>What it can tell you</th></tr></thead>
+        <tbody>
+          <tr><td>Which groups canceled more often in the historical data?</td><td>Descriptive analysis</td><td>Past patterns and group comparisons.</td></tr>
+          <tr><td>How likely is this booking to cancel?</td><td>Predictive modeling</td><td>An estimated probability, subject to validation.</td></tr>
+          <tr><td>Will sending a reminder prevent cancellation?</td><td>Causal evaluation</td><td>Requires an experiment or an appropriate causal design; SQL and a risk model alone cannot answer it.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout"><strong>Practical scenario:</strong> a model flags a booking as higher risk. A sensible next step might be a low-cost confirmation reminder tested in a controlled pilot. It is not automatically a reason to cancel the guest's reservation, charge them more, or overbook the hotel.</div>
+      <h3>Define when the prediction is made</h3>
+      <p>Write a sentence such as: <strong>"Estimate cancellation risk using information available when the booking is first created."</strong> This sentence determines which columns are allowed. A detail learned after the booking was made cannot be used to simulate a booking-time prediction.</p>
+      <p>Alternatively, predicting a week before arrival is a different product with different allowable features. Do not mix the two silently.</p>
+      <h3>Turn the problem into a project question</h3>
+      <p><em>"How do booking characteristics relate to cancellation, and can an interpretable model identify higher-risk bookings in a later time period?"</em></p>
+      <div class="exercise"><strong>Try it:</strong> a segment has a higher cancellation rate and often uses a particular channel. Can you conclude that the channel causes cancellations?</div>
+      <details><summary>Show the explanation</summary><p>No. That channel may attract bookings made much further in advance, different customer types, or different hotels. Those differences can explain part of the pattern. You can report an association and propose a test, not claim causation.</p></details>
+    </section>
+
+    <section id="data">
+      <div class="chapter">03 / Read the data like a booking</div>
+      <h2>What a row and a column mean</h2>
+      <p>A <strong>row</strong> represents one booking record, not necessarily one guest, one night, or one unique person. A <strong>column</strong> stores an attribute. Your analysis must keep that unit of measurement consistent.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Column</th><th>Plain English</th><th>Practical interpretation</th></tr></thead>
+        <tbody>
+          <tr><td><code>is_canceled</code></td><td>The target outcome.</td><td>1 means canceled; 0 means not canceled. "Not canceled" should not automatically be relabeled "completed stay" without checking status definitions.</td></tr>
+          <tr><td><code>hotel</code></td><td>The hotel category.</td><td>For example, City Hotel or Resort Hotel.</td></tr>
+          <tr><td><code>lead_time</code></td><td>Days between entering the booking and scheduled arrival.</td><td>A lead time of 120 is an advance booking; 5 is much closer to arrival.</td></tr>
+          <tr><td><code>market_segment</code></td><td>The commercial category.</td><td>Online TA describes an online travel-agent segment; it is not the same field as distribution channel.</td></tr>
+          <tr><td><code>distribution_channel</code></td><td>The route used to distribute the booking.</td><td>TA/TO refers to travel agents / tour operators; Direct is a separate route.</td></tr>
+          <tr><td><code>deposit_type</code></td><td>The recorded deposit arrangement.</td><td>Treat No Deposit, Non Refund, and Refundable as categories; do not assume one numeric ordering.</td></tr>
+          <tr><td><code>customer_type</code></td><td>The booking's customer classification.</td><td>Examples include Transient, Transient-Party, Contract, and Group. Verify definitions in the data dictionary.</td></tr>
+          <tr><td><code>is_repeated_guest</code></td><td>Repeat-guest indicator.</td><td>1 means flagged as a repeated guest, not a count of previous stays.</td></tr>
+          <tr><td><code>total_of_special_requests</code></td><td>A count of recorded requests.</td><td>A request might signal engagement, but it is not proof of intent or a causal protection against cancellation.</td></tr>
+          <tr><td><code>adr</code></td><td>Average daily rate.</td><td>A rate, not total booking revenue. Its timing and updates must be checked before using it as a booking-time feature.</td></tr>
+          <tr><td><code>reservation_status</code>, <code>reservation_status_date</code></td><td>Final status and the date of that status.</td><td>Outcome-related information that must not enter the cancellation model.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Our shared miniature dataset</h3>
+      <p class="example">Fictional teaching data - not rows from Kaggle</p>
+      <p>The IDs below exist only to make the explanation easy to follow. They are not a promise that the source CSV has a reliable booking ID. "None" abbreviates No Deposit; "Nonrefund" abbreviates Non Refund.</p>
+      <div class="table-wrap"><table>
+        <caption>Eight invented bookings used in the SQL and segmentation chapters.</caption>
+        <thead><tr><th>ID</th><th>Hotel</th><th>Lead days</th><th>Channel</th><th>Deposit</th><th>Repeat</th><th>Requests</th><th>Canceled</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td>City</td><td>10</td><td>Direct</td><td>None</td><td>1</td><td>1</td><td>0</td></tr>
+          <tr><td>B</td><td>City</td><td>120</td><td>TA/TO</td><td>None</td><td>0</td><td>0</td><td>1</td></tr>
+          <tr><td>C</td><td>Resort</td><td>90</td><td>TA/TO</td><td>None</td><td>0</td><td>2</td><td>0</td></tr>
+          <tr><td>D</td><td>Resort</td><td>5</td><td>Direct</td><td>Nonrefund</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>E</td><td>City</td><td>200</td><td>TA/TO</td><td>None</td><td>0</td><td>0</td><td>1</td></tr>
+          <tr><td>F</td><td>City</td><td>40</td><td>Corporate</td><td>None</td><td>1</td><td>0</td><td>0</td></tr>
+          <tr><td>G</td><td>Resort</td><td>60</td><td>Direct</td><td>Refundable</td><td>0</td><td>1</td><td>1</td></tr>
+          <tr><td>H</td><td>Resort</td><td>15</td><td>TA/TO</td><td>None</td><td>0</td><td>0</td><td>0</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Work it out:</strong> B, E, and G canceled. That is 3 canceled bookings out of 8 total: a fictional cancellation rate of <strong>37.5%</strong>. It is a booking rate, not the percentage of guests or room nights canceled.</p>
+    </section>
+
+    <section id="setup">
+      <div class="chapter">04 / Tools and setup</div>
+      <h2>Give each tool a clear job</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tool</th><th>Job in this project</th><th>Simple analogy</th></tr></thead>
+        <tbody>
+          <tr><td>CSV</td><td>The downloaded source file.</td><td>A flat spreadsheet saved as text.</td></tr>
+          <tr><td>PostgreSQL</td><td>Store/query the booking data and execute analytical SQL.</td><td>Your existing database engine.</td></tr>
+          <tr><td>DBeaver</td><td>Connect to PostgreSQL, inspect tables, and run SQL files.</td><td>A visual workbench, not a second database.</td></tr>
+          <tr><td>SQL</td><td>Filter, group, count, calculate rates, and export summaries.</td><td>Instructions for asking structured questions of tables.</td></tr>
+          <tr><td>Python</td><td>Run the workflow, build models, and orchestrate outputs.</td><td>The coordinator between the tools.</td></tr>
+          <tr><td>pandas / NumPy</td><td>Prepare PostgreSQL model input for scikit-learn.</td><td>A modeling bridge, not the replacement for SQL analysis.</td></tr>
+          <tr><td>scikit-learn</td><td>Preprocess features, fit models, and calculate evaluation metrics.</td><td>A machine-learning toolkit.</td></tr>
+          <tr><td>pytest</td><td>Automatically check agreed data-quality rules.</td><td>A repeatable inspection checklist.</td></tr>
+          <tr><td>Git</td><td>Track focused changes and their reasons.</td><td>A versioned project history.</td></tr>
+          <tr><td>Power BI / Tableau</td><td>Visualize the exported summaries.</td><td>The presentation layer you build yourself.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Suggested project layout</h3>
+      <pre><code>hotel-cancellation-project
+|-- data
+|   |-- raw                  Original Kaggle CSV; unchanged
+|   |-- processed            Local SQL summaries and model run bundles
+|   `-- exports              Dashboard-ready CSVs
+|-- sql                      One business question per .sql file
+|-- src                      Python workflow and modeling modules
+|-- tests                    Data-quality and transformation checks
+|-- DATA.md                  Cleaning rules and dataset definitions
+|-- README.md                Project story and reproduction commands
+|-- recommendation.md        Your headings-only recommendation template
+|-- requirements.txt         Direct Python dependencies
+`-- .gitignore               Exclude environments and generated/raw data</code></pre>
+      <p>Keep raw booking files and local databases out of Git by default. Record where to download the dataset instead. Review licensing before redistributing any data or derived extracts.</p>
+      <h3>What setup commands would look like on Windows</h3>
+      <pre><code>python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pytest</code></pre>
+      <p>A virtual environment isolates this project's packages. Using its Python executable directly also avoids relying on shell activation. These commands assume a requirements file and tests have been created during implementation.</p>
+      <p>The requirements file lists <code>psycopg</code>, <code>python-dotenv</code>, <code>numpy</code>, <code>pandas</code>, <code>scikit-learn</code>, and <code>pytest</code>. It pins the tested direct dependencies. PostgreSQL and DBeaver are installed separately; DuckDB is not required.</p>
+      <div class="callout"><strong>Why SQL first?</strong> Someone reviewing the repository should find the actual business calculations in named SQL files, not have to search through Python notebook cells to discover how a rate was calculated.</div>
+    </section>
+
+    <section id="quality">
+      <div class="chapter">05 / Phase 1</div>
+      <h2>Setup and data quality: make the denominator trustworthy</h2>
+      <p>Cleaning is not "delete anything unusual." It is a series of documented decisions about meaning, validity, and scope. Preserve the source and build a clean analytical layer separately.</p>
+      <h3>Step 1: Load without hiding parsing problems</h3>
+      <p>The importer reads your local CSV into PostgreSQL using text columns first. This preserves unexpected values for inspection before typed cleaning. Reading a raw table successfully is not the same as validating it.</p>
+      <pre><code># PowerShell, from the project folder after configuring .env:
+.\.venv\Scripts\python.exe -m src.load_data
+
+# Then inspect the schema with DBeaver.</code></pre>
+      <p>Python uses <code>COPY FROM STDIN</code>, so the PostgreSQL server does not need access to a Windows file path on your machine. Do not separately use DBeaver's import wizard: use the importer for consistent source record numbers, checksums, and quality auditing. See DATA.md for the exact null markers.</p>
+      <h3>Step 2: Ask what missing really means</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Example problem</th><th>Tempting mistake</th><th>Better documented decision</th></tr></thead>
+        <tbody>
+          <tr><td><code>children</code> is blank.</td><td>Always replace it with 0.</td><td>Missing is unknown, not necessarily no children. Profile it, preserve a flag, and justify any imputation separately.</td></tr>
+          <tr><td><code>agent</code> is blank.</td><td>Delete the booking.</td><td>Check whether this represents no agent or unknown agent. Retain the booking unless there is a justified exclusion.</td></tr>
+          <tr><td><code>country</code> is missing.</td><td>Guess it from hotel location.</td><td>Keep it unknown; the guest's country is not the hotel's country.</td></tr>
+          <tr><td><code>is_canceled</code> is not 0 or 1.</td><td>Convert every unexpected value to 0.</td><td>Flag the invalid label and exclude/quarantine it from labeled analysis under an explicit policy.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Step 3: Handle zero-guest records carefully</h3>
+      <p class="example">Fictional cleaning examples</p>
+      <p>A row with adults = 0, children = 0, and babies = 0 has no recorded guests. A row with adults = 0 and children = 2 does not have zero guests. A row with children missing has an unknown total, not a confirmed total of zero.</p>
+      <pre><code>-- Assumes guest columns have already been validated and typed.
+SELECT
+    *,
+    CASE
+        WHEN adults IS NULL OR children IS NULL OR babies IS NULL
+            THEN 'unknown_guest_count'
+        WHEN adults = 0 AND children = 0 AND babies = 0
+            THEN 'zero_guests'
+        ELSE 'positive_guests'
+    END AS guest_count_status
+FROM hotel_booking.bookings_quality;</code></pre>
+      <p>For a guest-booking analysis, confirmed zero-guest records may be excluded from the clean analytical table while remaining in raw data. Do not apply that exclusion before inspecting the records and documenting the choice.</p>
+      <h3>Step 4: Construct and validate dates</h3>
+      <p class="example">Fictional date construction example</p>
+      <p>Year = 2017, month = July, day = 15 becomes a single arrival date: <code>2017-07-15</code>. A constructed date such as February 31 is invalid.</p>
+      <pre><code>-- Fictional PostgreSQL example with known valid pieces:
+SELECT make_date(2017, 7, 15) AS arrival_date;
+
+-- Review actual parse failures after running the importer:
+SELECT source_record_number, exclusion_reasons
+FROM hotel_booking.bookings_quality
+WHERE 'invalid_arrival_date' = ANY(exclusion_reasons);</code></pre>
+      <p><code>make_date</code> constructs a calendar date. The actual cleaning SQL first maps English month names and uses a session-local safe wrapper: impossible dates become NULL with an explicit exclusion reason. It never silently normalizes February 31 into another date. Inspect the flagged raw values before approving the policy.</p>
+      <h3>Step 5: Investigate duplicates and implausible values</h3>
+      <p>Identical rows are not automatically duplicate bookings. Two different guests can make bookings with identical recorded attributes. Without a trusted identifier, preserve them by default or justify another policy; report any sensitivity analysis separately.</p>
+      <p>Negative lead times, negative guest counts, invalid labels, and failed numeric casts need flags. Very high room rates or zero-night stays deserve investigation, not arbitrary deletion. A rare value is not necessarily a wrong value.</p>
+      <h3>Step 6: Keep a cleaning ledger in DATA.md</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Issue</th><th>Decision</th><th>Reason</th><th>Count</th></tr></thead>
+        <tbody>
+          <tr><td>Confirmed zero guests</td><td>Exclude from the guest-booking analytical layer after review.</td><td>Outside the defined analysis population.</td><td>[RESULT: zero-guest exclusions]</td></tr>
+          <tr><td>Identical records without a reliable ID</td><td>Retain by default; document the audit.</td><td>Cannot prove they are duplicate bookings.</td><td>[RESULT: identical-row count]</td></tr>
+          <tr><td>Invalid arrival date</td><td>Quarantine from time-based outputs; review source values.</td><td>Cannot assign a trustworthy period.</td><td>[RESULT: invalid-date count]</td></tr>
+          <tr><td>Missing guest counts</td><td>Flag as unknown; define treatment for each output.</td><td>Unknown is not zero.</td><td>[RESULT: unknown-guest count]</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Reconciliation:</strong> raw rows = retained analytical rows + excluded rows, when those categories are mutually exclusive. If one record has several issue flags, do not add overlapping issue counts and call that the number of excluded rows.</p>
+      <div class="exercise"><strong>Try it:</strong> you find a booking with adults = 0, children = NULL, babies = 0. Should it count as a confirmed zero-guest booking?</div>
+      <details><summary>Show the explanation</summary><p>No. The children count is unknown. Replacing NULL with zero before applying the exclusion would create an unsupported assumption and could delete a real booking.</p></details>
+      <p class="checkpoint"><strong>Stop and review:</strong> approve the population definition, missing-value rules, date handling, duplicate policy, exclusion counts, and automated checks before Phase 2.</p>
+    </section>
+
+    <section id="sql">
+      <div class="chapter">06 / Phase 2</div>
+      <h2>SQL analysis: ask one clear question at a time</h2>
+      <p>Most cancellation queries share the same structure: select a population, group if needed, count bookings, count cancellations, and divide using that same population.</p>
+      <div class="formula">Cancellation rate = canceled bookings / all eligible bookings</div>
+      <h3>Run the eight-booking example yourself</h3>
+      <p>The following SQL is self-contained in a PostgreSQL session in DBeaver and creates only fictional teaching data. Its short hotel/deposit labels are simplified for readability. Temporary tables exist only in the connection that creates them.</p>
+      <pre><code>DROP TABLE IF EXISTS pg_temp.toy_bookings;
+CREATE TEMP TABLE toy_bookings AS
+SELECT * FROM (VALUES
+    ('A', 'City',   10, 'Direct',    'None',       1, 1, 0),
+    ('B', 'City',  120, 'TA/TO',     'None',       0, 0, 1),
+    ('C', 'Resort', 90, 'TA/TO',     'None',       0, 2, 0),
+    ('D', 'Resort',  5, 'Direct',    'Nonrefund',  0, 0, 0),
+    ('E', 'City',  200, 'TA/TO',     'None',       0, 0, 1),
+    ('F', 'City',   40, 'Corporate', 'None',       1, 0, 0),
+    ('G', 'Resort', 60, 'Direct',    'Refundable', 0, 1, 1),
+    ('H', 'Resort', 15, 'TA/TO',     'None',       0, 0, 0)
+) AS t(
+    booking_id, hotel, lead_time, channel, deposit,
+    repeat_guest, requests, is_canceled
+);
+
+-- Question: What share of eligible bookings canceled overall?
+SELECT
+    count(*) AS bookings,
+    sum(is_canceled) AS cancellations,
+    avg(is_canceled::numeric) AS cancellation_rate
+FROM toy_bookings;</code></pre>
+      <p>The fictional output is bookings = 8, cancellations = 3, rate = 0.375. A dashboard can format 0.375 as 37.5%; do not multiply by 100 twice.</p>
+      <h3>Read the calculation line by line</h3>
+      <ul>
+        <li><code>count(*)</code> counts rows: your booking denominator.</li>
+        <li><code>sum(is_canceled)</code> adds the ones: the cancellation numerator.</li>
+        <li><code>avg(is_canceled::numeric)</code> averages a validated binary outcome, giving the same rate.</li>
+        <li><code>FROM</code> identifies the exact population being analyzed.</li>
+      </ul>
+      <p><strong>Important:</strong> SQL averages ignore NULL. If the target contains NULL, the rate denominator can differ from <code>count(*)</code>. Validate the target first and explain any exclusion.</p>
+      <h3>Compare hotel types</h3>
+      <pre><code>-- Question: How does cancellation rate differ by hotel type?
+SELECT
+    hotel,
+    count(*) AS bookings,
+    sum(is_canceled) AS cancellations,
+    avg(is_canceled::numeric) AS cancellation_rate
+FROM toy_bookings
+GROUP BY hotel
+ORDER BY hotel;</code></pre>
+      <p class="example">Fictional answer</p>
+      <p>City has 2 cancellations among 4 bookings: 50%. Resort has 1 among 4: 25%. The overall rate is 3/8 = 37.5%. These tiny groups are a teaching device, not evidence about real hotel performance.</p>
+      <h3>Turn a numeric field into meaningful bands</h3>
+      <pre><code>-- Question: How does cancellation rate vary by lead-time band?
+WITH banded AS (
+    SELECT
+        CASE
+            WHEN lead_time &lt; 30 THEN '01: under 30 days'
+            WHEN lead_time &lt; 90 THEN '02: 30-89 days'
+            ELSE '03: 90+ days'
+        END AS lead_time_band,
+        is_canceled
+    FROM toy_bookings
+)
+SELECT
+    lead_time_band,
+    count(*) AS bookings,
+    sum(is_canceled) AS cancellations,
+    avg(is_canceled::numeric) AS cancellation_rate
+FROM banded
+GROUP BY lead_time_band
+ORDER BY lead_time_band;</code></pre>
+      <p><code>CASE</code> creates the labels; <code>WITH</code> names an intermediate result. The bands are illustrative choices, not discovered optimum thresholds. Invalid or missing lead times must be handled before this query, or explicitly placed in an Unknown group.</p>
+      <h3>The full query checklist</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Suggested file</th><th>Question it answers</th><th>Important detail</th></tr></thead>
+        <tbody>
+          <tr><td><code>01_overall.sql</code></td><td>What is the overall cancellation rate?</td><td>Show numerator and denominator.</td></tr>
+          <tr><td><code>02_hotel.sql</code></td><td>How does it differ by hotel type?</td><td>Include group size.</td></tr>
+          <tr><td><code>03_lead_time.sql</code></td><td>How does it vary by booking lead time?</td><td>Document non-overlapping bands.</td></tr>
+          <tr><td><code>04_market_segment.sql</code></td><td>Which commercial segments differ?</td><td>Do not confuse this with your custom behavior segments.</td></tr>
+          <tr><td><code>05_distribution_channel.sql</code></td><td>How do distribution channels compare?</td><td>Keep missing/unknown categories visible.</td></tr>
+          <tr><td><code>06_deposit_type.sql</code></td><td>How do deposit arrangements compare?</td><td>Do not infer a deposit policy caused the pattern.</td></tr>
+          <tr><td><code>07_customer_type.sql</code></td><td>How do customer classifications compare?</td><td>Use the actual dictionary definitions.</td></tr>
+          <tr><td><code>08_season.sql</code></td><td>How does cancellation vary by season?</td><td>Define season using scheduled arrival date.</td></tr>
+        </tbody>
+      </table></div>
+      <p>A transparent season definition could be Dec-Feb = winter, Mar-May = spring, Jun-Aug = summer, Sep-Nov = autumn. This is a declared calendar convention, not a claim about hotel-specific demand. Also inspect year-month trends because partial years and changing hotel mix can distort seasonal comparisons.</p>
+      <div class="exercise"><strong>Try it:</strong> one group has 1 cancellation out of 2 bookings; another has 90 out of 100. Is the overall rate the average of 50% and 90%?</div>
+      <details><summary>Show the worked answer</summary><p>No. These fictional groups have different sizes. Combine their counts: 91 / 102 = approximately 89.2%, not 70%. Use a weighted calculation or recompute from underlying bookings.</p></details>
+      <p class="checkpoint"><strong>Stop and review:</strong> every required dimension has its own commented SQL file, counts reconcile, missing categories are explained, and comparisons do not overclaim causation.</p>
+    </section>
+
+    <section id="segments">
+      <div class="chapter">07 / Phase 3</div>
+      <h2>Segmentation: turn many rows into understandable groups</h2>
+      <p>A segment is a defined group of bookings. It is not automatically a risk prediction. The best starting point here is a small rule set a nontechnical operations colleague can explain.</p>
+      <h3>Use ordered rules so each booking belongs once</h3>
+      <p>The following rules use every requested behavior: lead time, channel, deposit, repeat status, and requests. Rules are applied top to bottom; the first matching rule wins.</p>
+      <pre><code>-- Question: What are the sizes and rates of behavior segments?
+WITH segmented AS (
+    SELECT
+        *,
+        CASE
+            WHEN repeat_guest = 1
+                THEN 'Returning guest'
+            WHEN lead_time &gt;= 90
+                 AND channel = 'TA/TO'
+                 AND deposit = 'None'
+                THEN 'Advance agency, no deposit'
+            WHEN requests &gt;= 1
+                THEN 'Other with requests'
+            ELSE 'Other bookings'
+        END AS segment
+    FROM toy_bookings
+)
+SELECT
+    segment,
+    count(*) AS bookings,
+    sum(is_canceled) AS cancellations,
+    avg(is_canceled::numeric) AS cancellation_rate
+FROM segmented
+GROUP BY segment
+ORDER BY bookings DESC, segment;</code></pre>
+      <div class="table-wrap"><table>
+        <caption>Fictional segment results from the eight-booking teaching table.</caption>
+        <thead><tr><th>Segment</th><th>Members</th><th>Size</th><th>Canceled</th><th>Rate</th></tr></thead>
+        <tbody>
+          <tr><td>Returning guest</td><td>A, F</td><td>2</td><td>0</td><td>0%</td></tr>
+          <tr><td>Advance agency, no deposit</td><td>B, C, E</td><td>3</td><td>2</td><td>66.7% rounded</td></tr>
+          <tr><td>Other with requests</td><td>G</td><td>1</td><td>1</td><td>100%</td></tr>
+          <tr><td>Other bookings</td><td>D, H</td><td>2</td><td>0</td><td>0%</td></tr>
+        </tbody>
+      </table></div>
+      <p>Notice that A has a request but belongs to Returning guest. C has requests but belongs to Advance agency, no deposit. This is intentional precedence, not an error. Change the order and you change the segment definitions.</p>
+      <div class="callout warning"><strong>Do not overread small groups.</strong> G's segment has a fictional 100% rate because it contains only one booking. That does not make it a reliable high-risk category. Always show sizes and consider uncertainty or minimum reporting sizes.</div>
+      <h3>Why not clustering immediately?</h3>
+      <p>Clustering discovers groups based on a similarity definition. That introduces choices about scaling, encoding, distance, and number of clusters. Your prompt deliberately starts with rules so the first version stays understandable. Add clustering only after you explicitly request it.</p>
+      <p><strong>For later predictive use:</strong> define rules and thresholds using business reasoning or earlier training data. Do not inspect final test outcomes, redesign segments around them, and then claim an independent test.</p>
+      <div class="exercise"><strong>Try it:</strong> a returning guest books 150 days in advance through TA/TO with no deposit. Where do they belong in these rules?</div>
+      <details><summary>Show the answer</summary><p>Returning guest, because that rule appears first. If you want overlapping segments instead, that is a different design: totals may exceed the number of bookings and must be labeled accordingly.</p></details>
+      <p class="checkpoint"><strong>Stop and review:</strong> approve rule order, thresholds, missing-value handling, group sizes, and the difference between descriptive groups and individual predictions.</p>
+    </section>
+
+    <section id="model">
+      <div class="chapter">08 / Phase 4</div>
+      <h2>A cancellation model without cheating</h2>
+      <p>A model learns relationships from historical features and known outcomes. For a new booking, it produces a cancellation probability. That probability is an estimate, not a guarantee or a judgment about the guest.</p>
+      <h3>Features and target</h3>
+      <p><strong>Features</strong> are inputs, such as lead time and channel. The <strong>target</strong> is the value being predicted: <code>is_canceled</code>. Never include the target itself among the inputs.</p>
+      <h3>Why logistic regression first?</h3>
+      <p>Logistic regression combines numeric inputs and encoded categories into a score and converts it to a probability between zero and one. It is a strong baseline because it is relatively simple to explain and inspect.</p>
+      <p class="example">Fictional interpretation example</p>
+      <p>If a fitted feature has an odds ratio of 1.5, it is associated with 1.5 times the cancellation odds for the stated feature change, holding the other modeled inputs fixed. That does <strong>not</strong> mean a 50-percentage-point increase in probability, and it does not establish cause. Feature scaling and category reference levels must be stated when explaining coefficients.</p>
+      <p>A shallow decision tree can be the one tree-based comparator. It learns branching rules and may capture interactions logistic regression misses, but can overfit. Compare on the same features and chronological evaluation population.</p>
+      <h3>Leakage: information from the future</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Input</th><th>Booking-time suitability</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Lead time recorded at booking</td><td>Candidate input.</td><td>Can be known when the booking is made.</td></tr>
+          <tr><td>Final reservation status</td><td>Exclude.</td><td>Contains or closely reveals the outcome.</td></tr>
+          <tr><td>Reservation status date</td><td>Exclude from features.</td><td>Outcome-related timing not available at booking.</td></tr>
+          <tr><td>Assigned room type, changes, waiting-list duration</td><td>Audit carefully; exclude unless timing is defensible.</td><td>May reflect events after booking creation.</td></tr>
+          <tr><td>Requests, deposit, or rate in a final extract</td><td>Verify their snapshot timing.</td><td>A plausible field name is not proof that its recorded value was available at prediction time.</td></tr>
+        </tbody>
+      </table></div>
+      <pre><code># These describe the eventual outcome and would leak future
+# information into a cancellation prediction.
+leakage_columns = ["reservation_status", "reservation_status_date"]
+model_data = clean_data.drop(columns=leakage_columns)
+
+# Still choose an explicit audited feature list; dropping two
+# known leakage columns does not make every other column safe.</code></pre>
+      <h3>Split by time, not by shuffling</h3>
+      <p class="example">Illustrative split dates - not optimized or evaluated</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Period</th><th>Purpose</th><th>Allowed decisions</th></tr></thead>
+        <tbody>
+          <tr><td>Earlier period: before April 2017</td><td>Training</td><td>Learn imputations, encodings, scaling, and model parameters.</td></tr>
+          <tr><td>Middle period: April-June 2017</td><td>Validation</td><td>Select settings, threshold, and the preferred model without accessing final test outcomes.</td></tr>
+          <tr><td>Later period: July 2017 onward</td><td>Final test</td><td>Evaluate the frozen approach once and report the requested metrics.</td></tr>
+        </tbody>
+      </table></div>
+      <p>In an actual implementation, first inspect date coverage and class counts. Your prompt does not prescribe these dates. The split must contain enough examples of both outcomes to make evaluation meaningful.</p>
+      <div class="callout warning"><strong>Important dataset limitation:</strong> scheduled arrival date is not booking creation date. If you split by arrival date, describe it as a later-arrival holdout, not a perfect booking-time backtest. Long-lead future-arrival bookings may have been created before earlier-arrival bookings. A derived booking date (arrival date minus lead time) is only a proxy whose semantics need validation.</div>
+      <p><strong>Label availability also matters:</strong> when simulating a historical deployment, training outcomes must already have been known at that cutoff. A booking created before the cutoff but resolved later is not a usable labeled example at that moment. Outcome dates can inform a carefully documented audit without being model features. If this dataset cannot support a faithful as-of reconstruction, state that limitation explicitly.</p>
+      <h3>Fit preprocessing on training data only</h3>
+      <p>Suppose missing lead time is replaced by a median. Calculate that median from the training set only. Learning it from all records lets future data influence the model. The same rule applies to scaling, category encoding, feature selection, and any learned calibration step.</p>
+      <p>The following illustrative code assumes <code>train</code>, <code>validation</code>, and <code>test</code> are already cleaned, chronologically separated pandas frames returned from PostgreSQL, and that feature timing has been reviewed. The feature choice is a teaching example, not a timing certification. The actual runnable starter is <code>src\model.py</code>.</p>
+      <pre><code>from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+numeric = ["lead_time", "is_repeated_guest"]
+categorical = ["hotel", "distribution_channel", "deposit_type"]
+features = numeric + categorical
+
+preprocess = ColumnTransformer([
+    ("numeric", Pipeline([
+        ("impute", SimpleImputer(strategy="median")),
+        ("scale", StandardScaler()),
+    ]), numeric),
+    ("category", Pipeline([
+        ("impute", SimpleImputer(strategy="most_frequent")),
+        ("encode", OneHotEncoder(handle_unknown="ignore")),
+    ]), categorical),
+])
+
+model = Pipeline([
+    ("preprocess", preprocess),
+    ("classifier", LogisticRegression(max_iter=1000)),
+])
+
+# Only the training partition teaches the pipeline.
+model.fit(train[features], train["is_canceled"])
+validation_risk = model.predict_proba(validation[features])[:, 1]
+
+# Choose settings and a threshold using earlier validation data.
+# Freeze them before inspecting final test results.
+test_risk = model.predict_proba(test[features])[:, 1]</code></pre>
+      <p>Encoding turns categories into machine-readable indicator columns. Scaling puts numeric inputs on comparable scales. <code>handle_unknown="ignore"</code> allows a later unseen category, but you should still monitor and report category drift rather than treat it as irrelevant.</p>
+      <h3>A fair comparison</h3>
+      <p>Use a fresh preprocessing pipeline for a shallow decision tree, tune it on earlier validation data, and keep the final test untouched. Compare both models using the same final holdout. Include a simple baseline, such as the training cancellation rate assigned to every booking, so you know whether the extra complexity adds value.</p>
+      <p>Do not repeatedly adjust the model after seeing final test scores. If you do, that period becomes development data and a new independent test period is needed.</p>
+      <p class="checkpoint"><strong>Stop and review:</strong> approve the prediction moment, feature availability, date semantics, label-availability limitations, baseline, split, and final test report before producing dashboard risk summaries.</p>
+    </section>
+
+    <section id="metrics">
+      <div class="chapter">09 / Model evaluation in plain English</div>
+      <h2>What the scores actually mean</h2>
+      <p>Precision and recall depend on a threshold: the risk level at which you flag a booking. ROC-AUC evaluates ranking across thresholds. Calibration checks whether probabilities are believable. None of these alone tells you whether an intervention helps the business.</p>
+      <h3>Start with a confusion matrix</h3>
+      <p class="example">Fictional test set of 20 bookings - separate from the eight-booking SQL example</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th></th><th>Actually canceled</th><th>Actually not canceled</th></tr></thead>
+        <tbody>
+          <tr><th>Flagged as likely to cancel</th><td>6 true positives (TP)</td><td>2 false positives (FP)</td></tr>
+          <tr><th>Not flagged</th><td>3 false negatives (FN)</td><td>9 true negatives (TN)</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Precision:</strong> among the 8 flagged bookings, 6 canceled. Precision = 6 / (6 + 2) = <strong>75%</strong>. This helps describe how many alerts are correct.</p>
+      <p><strong>Recall:</strong> among the 9 actual cancellations, the model caught 6. Recall = 6 / (6 + 3) = <strong>66.7% rounded</strong>. This describes how many cancellations were detected.</p>
+      <p>False positives create unnecessary outreach. False negatives miss opportunities to act. A lower threshold generally flags more bookings and often raises recall at the cost of precision, but inspect the actual validation tradeoff.</p>
+      <div class="exercise no-print">
+        <h3>Try your own fictional counts</h3>
+        <p>These inputs are a learning calculator, not a trained model.</p>
+        <label for="tp">True positives <input id="tp" type="number" min="0" step="1" value="6"></label>
+        <label for="fp">False positives <input id="fp" type="number" min="0" step="1" value="2"></label>
+        <label for="fn">False negatives <input id="fn" type="number" min="0" step="1" value="3"></label>
+        <output id="metric-output" aria-live="polite"></output>
+      </div>
+      <h3>ROC-AUC: can the model rank risk?</h3>
+      <p>Imagine taking one canceled booking and one non-canceled booking. Does the model give the canceled one the higher score? ROC-AUC summarizes this ranking ability, counting a tied pair as half correct.</p>
+      <p class="example">Fictional ranking example</p>
+      <p>Canceled bookings have risks 0.9 and 0.6. Non-canceled bookings have risks 0.7 and 0.2. There are four cross-outcome pairs. The model ranks three correctly: 0.9 beats both non-canceled scores, and 0.6 beats 0.2 but not 0.7. AUC = 3 / 4 = <strong>0.75</strong>.</p>
+      <p>A constant-risk baseline has AUC 0.5 when both classes are present. AUC 1.0 is perfect ranking. AUC is <strong>not</strong> accuracy, not the percentage of cancellations prevented, and not a calibration score. AUC is undefined when the evaluated set contains only one outcome class.</p>
+      <h3>Calibration: can you trust a probability?</h3>
+      <p class="example">Fictional calibration example</p>
+      <p>Suppose 10 bookings each receive a predicted risk of 0.8, but only 4 cancel. Their mean predicted risk is 80%, while the observed rate is 40%. The model is overconfident in this group. A model can rank cases well and still give misleading probabilities.</p>
+      <p>For a calibration check, group final test predictions into risk bins and report each bin's count, average predicted risk, and observed cancellation rate. Small bins have substantial uncertainty. If you later fit a probability calibrator, fit it using earlier data, not the final test.</p>
+      <h3>What final test evaluation code looks like</h3>
+      <p>This example continues the variables from the modeling chapter. The threshold is illustrative; it must be selected and frozen using earlier validation data.</p>
+      <pre><code>import pandas as pd
+from sklearn.calibration import calibration_curve
+from sklearn.metrics import (
+    precision_score, recall_score, roc_auc_score,
+)
+
+y_test = test["is_canceled"]
+threshold = 0.50  # Illustrative; select before final test evaluation.
+test_flag = test_risk &gt;= threshold
+
+if y_test.nunique() != 2:
+    raise ValueError("Final test data must contain both outcome classes.")
+if not test_flag.any():
+    raise ValueError("No test alerts; precision is undefined. Report this.")
+
+scores = {
+    "precision": precision_score(y_test, test_flag),
+    "recall": recall_score(y_test, test_flag),
+    "roc_auc": roc_auc_score(y_test, test_risk),
+}
+observed, predicted = calibration_curve(
+    y_test, test_risk, n_bins=5, strategy="quantile"
+)
+
+# Group counts should also accompany the calibration display.
+test_predictions = pd.DataFrame({
+    "actual": y_test.to_numpy(),
+    "risk": test_risk,
+})</code></pre>
+      <p>Quantile bins aim for similar group sizes; identical risk values can reduce the number of nonempty bins. Preserve the realized bin definitions and counts. Do not replace undefined metrics with a flattering number or silently tune against the test set.</p>
+      <h3>Why not report only accuracy?</h3>
+      <p class="example">Fictional imbalance example</p>
+      <p>If only 10 out of 100 bookings cancel, a model that says "not canceled" for everyone has 90% accuracy and catches no cancellations. High accuracy can coexist with zero operational usefulness.</p>
+      <div class="exercise"><strong>Try it:</strong> which metric matters if the team can afford only a small number of reminder calls, and which matters if missing cancellations is especially costly?</div>
+      <details><summary>Show the explanation</summary><p>Precision is particularly relevant to limiting wasted calls, while recall describes cancellations missed. In practice, choose a threshold using earlier validation data, team capacity, intervention cost, and benefit assumptions. A useful additional capacity metric is precision among the top-ranked bookings, but it does not replace the required metrics.</p></details>
+    </section>
+
+    <section id="dashboard">
+      <div class="chapter">10 / Phase 5</div>
+      <h2>Dashboard data: export answers, not confusion</h2>
+      <p>Your task here is to prepare clean CSV summaries. You will build the Power BI or Tableau dashboard yourself. Define the <strong>grain</strong> of each file: what one row represents.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>File</th><th>One row represents</th><th>Useful columns</th></tr></thead>
+        <tbody>
+          <tr><td><code>cancellation_trends.csv</code></td><td>One scheduled arrival month and hotel.</td><td>arrival_month, hotel, bookings, cancellations, cancellation_rate</td></tr>
+          <tr><td><code>segment_comparison.csv</code></td><td>One behavior segment.</td><td>segment, bookings, cancellations, cancellation_rate</td></tr>
+          <tr><td><code>risk_distribution.csv</code></td><td>One predicted-risk bin in the final test population.</td><td>risk_band, bookings, mean_predicted_risk, observed_cancellation_rate, population</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Calculate a trend in PostgreSQL</h3>
+      <pre><code>-- Question: How do cancellation rates vary by arrival month and hotel?
+SELECT
+        date_trunc('month', arrival_date)::DATE AS arrival_month,
+        hotel,
+        count(*) AS bookings,
+        sum(is_canceled) AS cancellations,
+        avg(is_canceled::numeric) AS cancellation_rate
+    FROM hotel_booking.bookings_clean
+    GROUP BY arrival_month, hotel
+    ORDER BY arrival_month, hotel;</code></pre>
+      <p>The actual export command runs this kind of PostgreSQL query and writes the returned rows locally with Python. You do not need PostgreSQL server-side filesystem permissions. The month is the scheduled stay month, not the month someone clicked Cancel. A cancellation-event timeline needs a separate, carefully defined query using outcome timing.</p>
+      <h3>Common dashboard mistakes</h3>
+      <ul>
+        <li><strong>Summing rates:</strong> use total cancellations / total bookings for the filtered population. Do not sum percentages or average differently sized groups without weights.</li>
+        <li><strong>Joining incompatible grains:</strong> joining one row per segment onto one row per month can multiply rows. Keep separate fact tables or design a proper model.</li>
+        <li><strong>Showing mixed populations:</strong> historical SQL totals may cover all clean records, while risk scores cover only the later test period. Label those populations visibly.</li>
+        <li><strong>Hiding zero-booking months:</strong> if adding a calendar to show gaps, use zero counts but leave cancellation rate undefined when the denominator is zero.</li>
+        <li><strong>Calling risk a certainty:</strong> a high-risk band still includes bookings that do not cancel.</li>
+      </ul>
+      <p>Store rates as decimals between 0 and 1 and format them as percentages in the visualization. Document bin boundaries, segment rules, refresh date, and source population. Export aggregate data rather than unnecessary record-level details.</p>
+      <p class="checkpoint"><strong>Stop and review:</strong> inspect CSV headers, row grain, population labels, rate formatting, and reconciliation to SQL/model outputs before Phase 6.</p>
+    </section>
+
+    <section id="writing">
+      <div class="chapter">11 / Phase 6</div>
+      <h2>Write a project someone else can understand</h2>
+      <p>The README is a small case study and a runbook. It should make the project understandable to both a hiring manager and a technical reviewer.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Section</th><th>What to explain</th><th>Safe example language</th></tr></thead>
+        <tbody>
+          <tr><td>Question</td><td>The decision and analysis population.</td><td>"Investigate historical booking cancellations and evaluate later-period risk prediction."</td></tr>
+          <tr><td>Data</td><td>Source, unit of observation, coverage, cleaning reference.</td><td>"Booking-level data; cleaning and exclusions are documented in DATA.md."</td></tr>
+          <tr><td>Method</td><td>SQL analysis, ordered segments, feature audit, chronological evaluation.</td><td>"Compared logistic regression and one tree-based model using a documented temporal holdout."</td></tr>
+          <tr><td>Results</td><td>Verified outputs only, with the right populations.</td><td>"Overall cancellation rate: [RESULT: overall cancellation rate]. Test ROC-AUC: [RESULT: test ROC-AUC]."</td></tr>
+          <tr><td>Limitations</td><td>What conclusions cannot safely generalize.</td><td>"The model is not validated on other markets."</td></tr>
+          <tr><td>Reproduce</td><td>Download instructions, environment, commands, expected outputs.</td><td>"Place the CSV in data/raw/, install the tested dependencies, then run the documented pipeline."</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Required limitations, and what they mean</h3>
+      <p><strong>Two hotels in one country:</strong> this is a narrow setting, not a representative sample of the global hotel industry.</p>
+      <p><strong>Data from 2015-2017:</strong> booking channels, traveler behavior, and cancellation policies may have changed. Historical performance is not evidence of present-day deployment performance.</p>
+      <p><strong>Not validated on other markets:</strong> even a good internal holdout score does not establish reliability for another country, hotel platform, or business model.</p>
+      <p>Also explain relevant snapshot/feature timing uncertainty, partial-year coverage, observational rather than causal evidence, and limitations in reconstructing when outcomes became available.</p>
+      <h3>Your recommendation file stays yours</h3>
+      <pre><code># Context
+
+# Findings
+
+# Recommendation
+
+# Risks</code></pre>
+      <p>The original instruction says headings only. An assistant should not fill in these sections on your behalf. To prepare, ask yourself: What decision is at stake? Which verified findings support it? What limited pilot would you propose? What could go wrong? Your answers go into that file when you choose to write it.</p>
+      <h3>Placeholders prevent accidental fabrication</h3>
+      <p>Before results exist, write <code>[RESULT: final test recall]</code>, not "approximately 80% recall." A plausible number is still invented if it was not calculated. Teaching examples in this guide must never be copied into the project's results section.</p>
+      <p class="checkpoint"><strong>Stop and review:</strong> check every factual result against a saved output; confirm limitations and reproduction steps; keep recommendation.md headings-only until you write its content.</p>
+    </section>
+
+    <section id="engineering">
+      <div class="chapter">12 / Throughout the project</div>
+      <h2>Small engineering habits that make analysis credible</h2>
+      <h3>Type hints: make intent visible</h3>
+      <pre><code>"""Validate booking labels before computing cancellation summaries."""
+
+def cancellation_rate(labels: list[int]) -&gt; float:
+    if not labels:
+        raise ValueError("At least one booking is required.")
+    if any(label not in (0, 1) for label in labels):
+        raise ValueError("Cancellation labels must be 0 or 1.")
+    return sum(labels) / len(labels)</code></pre>
+      <p><code>list[int]</code> describes the expected input; <code>-&gt; float</code> describes the output. Type hints aid readers and tooling but do not validate data automatically. The checks explicitly reject invalid inputs instead of returning a misleading zero.</p>
+      <p>This tiny function is for learning Python and tests; the project's main cancellation aggregations still belong in SQL. The opening docstring explains <em>why</em> the module exists, not merely "this file contains functions."</p>
+      <h3>pytest: turn assumptions into checks</h3>
+      <pre><code>import pytest
+from src.quality import cancellation_rate
+
+def test_known_fictional_example() -&gt; None:
+    assert cancellation_rate([0, 1, 0, 1]) == pytest.approx(0.5)
+
+def test_invalid_label_is_rejected() -&gt; None:
+    with pytest.raises(ValueError, match="0 or 1"):
+        cancellation_rate([0, 2])
+
+def test_empty_population_is_rejected() -&gt; None:
+    with pytest.raises(ValueError, match="At least one"):
+        cancellation_rate([])</code></pre>
+      <p>These examples assume the function has been saved in <code>src\quality.py</code>. They illustrate tests; that module is not created by this guide.</p>
+      <h3>What actual data-quality tests should cover</h3>
+      <ul>
+        <li>Required columns exist and conversions are audited.</li>
+        <li>The analytical target is non-null and binary.</li>
+        <li>Retained records obey approved guest-count and date rules.</li>
+        <li>Confirmed zero guests are excluded if that policy was approved.</li>
+        <li>Raw, retained, and excluded populations reconcile without double counting.</li>
+        <li>Each booking receives exactly one segment under exclusive rules.</li>
+        <li>Training, validation, and test periods are ordered and disjoint.</li>
+        <li>Known leakage columns are not model features.</li>
+        <li>Exported cancellation counts never exceed their booking counts.</li>
+      </ul>
+      <p>A test that passes does not prove all data are correct. It proves that the specific assertion holds for the tested input. Test the cleaning transformations as well as the final table: a bad cleaning rule can produce a neat-looking table.</p>
+      <h3>Dependencies and reproducibility</h3>
+      <p>A requirements file should describe the tested Python packages. Record the Python version, dataset source/version or file checksum, execution order, output locations, and any random seed used by the comparator. A seed helps reproduce stochastic behavior; it does not fix a bad split.</p>
+      <h3>Small commits</h3>
+      <p>A commit is a focused saved change in Git. Useful commit subjects might be "Add raw import and schema audit," "Document zero-guest policy," or "Add cancellation queries by channel." Avoid one giant commit that hides every decision. Never commit secrets, local environments, or raw data by accident.</p>
+      <h3>What a phase handoff should contain</h3>
+      <p>State what changed, where the outputs are, which assumptions need approval, and any known limitations. Then stop. "Work in phases" is a collaboration rule, not just a set of section headings.</p>
+    </section>
+
+    <section id="walkthrough">
+      <div class="chapter">13 / Connect the pieces</div>
+      <h2>Follow one booking all the way through</h2>
+      <p class="example">Fictional booking B from our teaching table</p>
+      <h3>1. Raw record</h3>
+      <p>B is a City booking, made 120 days ahead, through TA/TO, with no deposit, no repeat-guest flag, no special requests, and a cancellation outcome of 1.</p>
+      <h3>2. Quality layer</h3>
+      <p>Before B enters the analysis, validate its label, guest fields, numeric fields, and constructed arrival date. Retain or exclude it according to the agreed policies, not because its outcome is inconvenient.</p>
+      <h3>3. SQL summaries</h3>
+      <p>B contributes one booking and one cancellation to the overall rate, the City group, the TA/TO channel, and the appropriate lead-time band. Groupings answer different questions; adding all those group totals together would count the same booking several times.</p>
+      <h3>4. Behavior segment</h3>
+      <p>B is not a repeat guest. It then satisfies the advance-agency/no-deposit rule and joins B, C, and E. That segment's fictional rate is 2/3, but it is not automatically B's individual model probability.</p>
+      <h3>5. Model input</h3>
+      <p>If B falls in the final test period, the model sees only its audited, allowable features. It must not see B's cancellation label or final status when predicting. Its actual outcome is used afterward to evaluate the prediction.</p>
+      <h3>6. Risk score</h3>
+      <p>Suppose, purely for explanation, B receives a risk of 0.72. This does not mean it will "72% cancel" as a single event. It means the model estimates a 72% probability; among many comparably scored bookings, calibration asks whether the observed frequency is similar.</p>
+      <h3>7. Dashboard</h3>
+      <p>B contributes to the historical arrival-month summary. If scored as part of the final test, it also contributes to the corresponding test risk bin. The dashboard should not imply those two files cover identical populations.</p>
+      <h3>8. Business action</h3>
+      <p>An operations team could consider a reminder pilot for a defined population. Before claiming value, define the intervention, cost, success measure, guest safeguards, and comparison group. Model evaluation alone cannot establish that the reminder works.</p>
+      <div class="callout"><strong>The whole chain:</strong> business decision &rarr; raw records &rarr; documented clean population &rarr; SQL patterns &rarr; understandable groups &rarr; leakage-aware prediction &rarr; honest evaluation &rarr; dashboard evidence &rarr; a testable business recommendation.</div>
+    </section>
+
+    <section id="resume">
+      <div class="chapter">14 / Tell the truth, clearly</div>
+      <h2>Turn completed work into a resume entry</h2>
+      <p>The strongest resume bullet says what you did, how you did it, and what you can substantiate. Do not describe planned work as completed work. Reading this guide alone does not establish the accomplishments below.</p>
+      <h3>If the project is still in progress</h3>
+      <div class="card"><strong>Hotel Booking Cancellation Analysis | Personal project, in progress</strong><p>Developing a SQL-first hotel booking analysis workflow with PostgreSQL, DBeaver, and Python, focusing on documented data cleaning, interpretable booking segments, and chronological cancellation-risk evaluation.</p></div>
+      <p>Use this only once development is genuinely underway, and remove any part you have not started. If you have only planned the project, do not list it as an implemented portfolio project yet.</p>
+      <h3>After the work is completed</h3>
+      <div class="card">
+        <strong>Hotel Booking Cancellation Analysis &amp; Risk Modeling</strong>
+        <p><em>Python, SQL, PostgreSQL, DBeaver, scikit-learn, pytest</em></p>
+        <ul>
+          <li>Analyzed hotel booking cancellations using PostgreSQL across hotel types, lead times, market segments, distribution channels, deposit types, customer types, and seasons.</li>
+          <li>Developed rule-based booking segments and compared logistic regression with a tree-based model using chronological evaluation and explicit leakage controls.</li>
+          <li>Documented data-cleaning decisions, implemented automated data-quality checks, and exported dashboard-ready CSV summaries for trend, segment, and risk analysis.</li>
+        </ul>
+      </div>
+      <h3>Add verified metrics only after evaluation</h3>
+      <p>"Evaluated cancellation risk on a later-period holdout of <code>[RESULT: test booking count]</code> bookings, achieving ROC-AUC <code>[RESULT: test ROC-AUC]</code> and recall <code>[RESULT: test recall]</code> at a validation-selected threshold."</p>
+      <p>Replace every placeholder before putting this on your resume. Include sample size, period, and threshold context in the repository so the score can be understood. Do not copy fictional numbers from this guide.</p>
+      <div class="callout warning"><strong>Claims to avoid:</strong> "reduced cancellations," "increased hotel revenue," "production-ready," and "built a Power BI dashboard" unless those specific outcomes happened and you can support them. Preparing CSVs is not the same as building a dashboard.</div>
+      <h3>Practice explaining it in an interview</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Question</th><th>A useful answer structure</th></tr></thead>
+        <tbody>
+          <tr><td>Why PostgreSQL and DBeaver?</td><td>"PostgreSQL runs the analytical SQL, while DBeaver provides an interface I already use to inspect and explain the queries."</td></tr>
+          <tr><td>Why not a random split?</td><td>"The task predicts later bookings, so I held out a later period and documented which date I used and its limitations."</td></tr>
+          <tr><td>How did you avoid leakage?</td><td>"I removed final status fields, audited feature timing, and fit preprocessing only on earlier training data."</td></tr>
+          <tr><td>Why start with logistic regression?</td><td>"It is an interpretable baseline. I compared it with one tree-based model rather than assuming complexity would help."</td></tr>
+          <tr><td>What was the biggest limitation?</td><td>"Only two hotels in one country, older data, no external-market validation, and limitations reconstructing booking-time snapshots."</td></tr>
+          <tr><td>Did the project reduce cancellations?</td><td>"It analyzed and predicted cancellations. Measuring a reduction would require deploying and evaluating an intervention."</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="glossary">
+      <div class="chapter">15 / Keep this page nearby</div>
+      <h2>A compact glossary and your next practical step</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Term</th><th>Meaning in this project</th></tr></thead>
+        <tbody>
+          <tr><td>Population</td><td>The exact set of bookings included in a calculation.</td></tr>
+          <tr><td>Denominator</td><td>The total eligible bookings under a rate.</td></tr>
+          <tr><td>Grain</td><td>What one row represents.</td></tr>
+          <tr><td>NULL</td><td>A missing/unknown database value; not automatically zero or an empty category.</td></tr>
+          <tr><td>Imputation</td><td>A documented method for filling missing model inputs.</td></tr>
+          <tr><td>One-hot encoding</td><td>Representing categories using separate indicator features.</td></tr>
+          <tr><td>Feature</td><td>An input used to make a prediction.</td></tr>
+          <tr><td>Target / label</td><td>The outcome the model learns to predict.</td></tr>
+          <tr><td>Leakage</td><td>Using information not legitimately available at prediction time or allowing evaluation information to influence training.</td></tr>
+          <tr><td>Temporal holdout</td><td>A later period reserved for evaluating a model trained on earlier data.</td></tr>
+          <tr><td>Overfitting</td><td>Learning patterns that work well on development data but do not generalize.</td></tr>
+          <tr><td>Threshold</td><td>The probability cutoff used to turn risks into alerts.</td></tr>
+          <tr><td>Calibration</td><td>Agreement between predicted probabilities and observed frequencies.</td></tr>
+          <tr><td>Drift</td><td>Changes in inputs, outcomes, or their relationships over time.</td></tr>
+          <tr><td>Baseline</td><td>A simple reference approach that a more complex model should justify improving on.</td></tr>
+          <tr><td>Reproducibility</td><td>Another person can follow the documented inputs and commands to obtain consistent outputs.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Start with Phase 1 when you are ready</h3>
+      <p>Starter code for every phase is available, but you still begin by downloading the CSV, configuring your database, and reviewing the actual Phase 1 quality counts. Continue manually, one phase at a time, using the next chapter and README.md.</p>
+      <p>This guide does not download your data, fabricate findings, run the real-data workflow, write your recommendation content, or push anything to GitHub.</p>
+      <h3>Official references for further reading</h3>
+      <ul>
+        <li><a href="https://doi.org/10.1016/j.dib.2018.11.126">Hotel booking demand datasets: original dataset publication</a> - consult the data dictionary for field semantics.</li>
+        <li><a href="https://www.postgresql.org/docs/current/sql-copy.html">PostgreSQL COPY documentation</a> - importing/exporting records and client/server file distinctions.</li>
+        <li><a href="https://www.postgresql.org/docs/current/sql-select.html">PostgreSQL SELECT documentation</a> - SQL query structure.</li>
+        <li><a href="https://scikit-learn.org/stable/common_pitfalls.html">scikit-learn common pitfalls</a> - leakage and inconsistent preprocessing.</li>
+        <li><a href="https://scikit-learn.org/stable/modules/calibration.html">scikit-learn probability calibration</a> - understanding risk estimates.</li>
+        <li><a href="https://docs.pytest.org/en/stable/getting-started.html">pytest getting started</a> - writing and running checks.</li>
+      </ul>
+      <div class="callout"><strong>What you should now be able to explain:</strong> why a rate needs a clear denominator; why missing does not mean zero; why ordered rules matter; why future information invalidates predictions; why precision, recall, ranking, and calibration answer different questions; and why honest limitations strengthen a portfolio project.</div>
+    </section>
+    <section id="do-later">
+      <div class="chapter">16 / Your manual execution workbook</div>
+      <h2>All phases are prepared. Run them later, one at a time.</h2>
+      <p>This chapter is the print-friendly command companion to <strong>README.md</strong>. Nothing here runs automatically. No real-data findings, recommendation content, commit, or push has been produced for you.</p>
+      <div class="callout warning"><strong>Before starting:</strong> use the project worktree, configure your dedicated PostgreSQL database and <code>.env</code>, download the CSV, and review DATA.md. Generated CSV/model bundles and credentials stay ignored by Git. Never share raw predictions or passwords accidentally.</div>
+      <h3>Phase 1: import, then inspect</h3>
+      <pre><code>.\.venv\Scripts\python.exe -m src.load_data</code></pre>
+      <p>In DBeaver, refresh <code>Schemas &gt; hotel_booking</code>. Inspect <code>bookings_raw</code>, <code>bookings_quality</code>, the <code>bookings_clean</code> view, and <code>load_audit</code>. Run <code>sql\phase1\03_quality_report.sql</code>.</p>
+      <p><strong>Stop:</strong> confirm raw = retained + excluded; investigate reasons and warnings. Review missing children, confirmed zero guests, invalid dates, and identical-row retention. Use <code>--replace</code> only when deliberately refreshing the imported snapshot.</p>
+
+      <h3>Phase 2: answer the SQL questions</h3>
+      <pre><code>.\.venv\Scripts\python.exe -m src.analyze --phase 2</code></pre>
+      <p>Alternatively, open individual files in <code>sql\phase2\</code> in DBeaver and select your PostgreSQL connection. The runner saves the same SQL results as CSV files and records the source snapshot in <code>data\processed\phase2\manifest.json</code>.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Files</th><th>What you learn</th></tr></thead>
+        <tbody>
+          <tr><td>01 overall / 02 hotel</td><td>Population baseline and hotel-type comparison.</td></tr>
+          <tr><td>03 lead time / 04 market segment</td><td>Advance-booking bands and commercial groups.</td></tr>
+          <tr><td>05 distribution channel / 06 deposit type</td><td>Booking routes and deposit arrangements.</td></tr>
+          <tr><td>07 customer type / 08 season</td><td>Customer classes and arrival seasons within each year.</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Stop:</strong> verify counts and denominators. Missing categories remain blank in CSV and must not disappear from your dashboard. Aggregate rates using summed counts, not an unweighted average. Partial-year data can distort seasonal comparisons.</p>
+
+      <h3>Phase 3: build and explain behavior groups</h3>
+      <pre><code>.\.venv\Scripts\python.exe -m src.analyze --phase 3</code></pre>
+      <p>This defines <code>hotel_booking.booking_segments</code> and exports <code>data\processed\phase3\02_segment_summary.csv</code>. In DBeaver, run <code>01_behavior_segments.sql</code> before <code>02_segment_summary.sql</code> if working manually.</p>
+      <ol>
+        <li>Repeat guest &rarr; Returning guest.</li>
+        <li>Otherwise, lead time at least 90 days + TA/TO + No Deposit &rarr; Advance agency, no deposit.</li>
+        <li>Otherwise, at least one request &rarr; Other with requests.</li>
+        <li>Otherwise &rarr; Other bookings.</li>
+      </ol>
+      <p><strong>Stop:</strong> explain the first-match rule. Missing channel/deposit does not satisfy the advance rule. Sizes must sum to the eligible population; rates from tiny segments should not be treated as reliable predictions. No clustering is added.</p>
+
+      <h3>Phase 4: choose your dates before fitting</h3>
+      <p>First run <code>sql\phase4\02_date_coverage.sql</code> in DBeaver. Inspect monthly counts of each outcome, choose defensible boundaries, and do not optimize the test period for a flattering score.</p>
+      <p class="example">Illustrative dates only - choose after coverage review</p>
+      <pre><code>.\.venv\Scripts\python.exe -m src.model `
+  --validation-start 2017-04-01 `
+  --test-start 2017-07-01 `
+  --acknowledge-snapshot-limitations</code></pre>
+      <p>Earlier arrivals train the model; the middle period selects thresholds; later arrivals form the final test. Each partition must have both outcomes. This is not a random split. The acknowledgment makes the final-extract timing limitation explicit; it does not certify a booking-time snapshot.</p>
+      <div class="callout warning"><strong>A later-arrival holdout is not a booking-time backtest.</strong> Booking creation order can differ from arrival order. Some inputs may have been updated after booking, and training labels may not have been known at a simulated historical cutoff. The scaffold does not reconstruct these histories and is not deployment validation.</div>
+      <p>Both models explicitly exclude final status and status date, use an allowlist, and fit preprocessing only on training. Logistic regression is the prespecified primary; one shallow tree is the comparator. A constant training-rate baseline provides context.</p>
+      <p>Each model's threshold is chosen using earlier validation F1 on a fixed grid from 0.1 to 0.9, with deterministic tie-breaking. This is a transparent teaching default, not a cost- or capacity-optimized operations policy. No threshold is selected from final test outcomes.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>File in data\processed\phase4\</th><th>How to read it</th></tr></thead>
+        <tbody>
+          <tr><td>test_metrics.json</td><td>Test-only precision, recall, ROC-AUC, Brier score, confusion counts, and frozen thresholds for both models and baseline.</td></tr>
+          <tr><td>test_calibration.csv</td><td>Test-bin sizes, average predictions, and observed cancellation rates.</td></tr>
+          <tr><td>test_predictions.csv</td><td>Local-only final-test probabilities from the prespecified logistic primary.</td></tr>
+          <tr><td>logistic_regression_features.csv</td><td>Coefficients on standardized numeric inputs and one-hot categories; not causal effects.</td></tr>
+          <tr><td>decision_tree_features.csv</td><td>Feature importances; they do not supply a direction or prove cause.</td></tr>
+          <tr><td>manifest.json</td><td>Cutoffs, source snapshot, input list, software versions, checksum, and limitations.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Calibration uses fixed tenths; empty bins have count zero and blank rates, and the final bin includes probability 1. If no bookings are flagged, precision is recorded as undefined with an explicit note, not replaced by a flattering score.</p>
+      <p><strong>Stop:</strong> compare with the baseline, explain the calibration, and retain all required limitations. Do not select a primary by repeatedly inspecting the final test. Saving another folder does not create an independent holdout.</p>
+
+      <h3>Phase 5: export dashboard tables</h3>
+      <pre><code>.\.venv\Scripts\python.exe -m src.export_dashboard</code></pre>
+      <p>The exporter requires the Phase 3 segment view and a reviewed Phase 4 model run. It rejects a prediction-file checksum mismatch or a different imported database snapshot, rather than silently mixing populations.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>File in data\exports\phase5\</th><th>Population and grain</th></tr></thead>
+        <tbody>
+          <tr><td>cancellation_trends.csv</td><td>All eligible bookings, one row per arrival month and hotel.</td></tr>
+          <tr><td>segment_comparison.csv</td><td>All eligible bookings, one row per behavior segment.</td></tr>
+          <tr><td>risk_distribution.csv</td><td>Final-test later arrivals only, one row per risk band.</td></tr>
+        </tbody>
+      </table></div>
+      <p>The SQL risk display bands are Low [0, 0.3), Medium [0.3, 0.7), and High [0.7, 1]. They are presentation choices, not intervention rules. Empty bins remain visible. A manifest records source and population definitions.</p>
+      <p><strong>Stop:</strong> import the CSVs separately in Power BI or Tableau. Do not create a join that multiplies monthly rows by segment rows. Format decimal rates as percentages and clearly label final-test risk separately from historical totals. You build the dashboard yourself.</p>
+
+      <h3>Phase 6: write only what you can support</h3>
+      <p>Fill the README's result slots from verified outputs. Explain question, data, method, results, limitations, and reproduction steps. Write your own recommendation in the headings-only <code>recommendation.md</code> template: Context, Findings, Recommendation, Risks.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Result to verify later</th><th>Placeholder</th></tr></thead>
+        <tbody>
+          <tr><td>Overall cancellation rate</td><td>[RESULT: overall cancellation rate]</td></tr>
+          <tr><td>Primary model precision</td><td>[RESULT: logistic test precision]</td></tr>
+          <tr><td>Primary model recall</td><td>[RESULT: logistic test recall]</td></tr>
+          <tr><td>Primary model ROC-AUC</td><td>[RESULT: logistic test ROC-AUC]</td></tr>
+          <tr><td>Calibration interpretation</td><td>[RESULT: test calibration interpretation]</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Required limitations:</strong> two hotels in one country; data from 2015-2017; the model is not validated on other markets. Also state feature/label timing uncertainty, partial-year coverage, lack of causal evidence, and unmeasured operational impact.</p>
+
+      <h3>Reruns and checks</h3>
+      <p>Later-phase output folders are write-once. For deliberate reruns, add a new <code>--output</code> path. If changing the model folder, pass that existing folder to the exporter through <code>--model-run</code>. Do not delete earlier outputs just to hide a disappointing result.</p>
+      <pre><code>.\.venv\Scripts\python.exe -m pytest -m "not integration"</code></pre>
+      <p>For SQL-backed checks, use a separate disposable PostgreSQL database and the explicit test configuration from README.md. Tests use fictional records; their outputs are not your dataset findings.</p>
+      <div class="callout"><strong>Publication is a separate step.</strong> Nothing has been pushed. Before a later commit or push, review secrets, ignored data, licensing, result placeholders, and which learning documents you want to share. Use small focused commits when you choose to commit.</div>
+    </section>
+    <footer>Hotel Booking Cancellation Project / PostgreSQL learning companion<br>All illustrative booking data and model outputs are fictional. Real findings require the downloaded dataset and verified analysis. Manual instructions only; no automatic push.</footer>
+  </main>
+</div>
+<script>
+  "use strict";
+  const metricInputs = ["tp", "fp", "fn"].map(id => document.getElementById(id));
+  const metricOutput = document.getElementById("metric-output");
+  function updateMetrics() {
+    const values = metricInputs.map(input => input.valueAsNumber);
+    if (metricInputs.some(input => input.value.trim() === "") ||
+        values.some(value => !Number.isSafeInteger(value) || value < 0)) {
+      metricOutput.textContent = "Enter a nonnegative whole number in every field.";
+      return;
+    }
+    const [tp, fp, fn] = values;
+    if (!Number.isSafeInteger(tp + fp) || !Number.isSafeInteger(tp + fn)) {
+      metricOutput.textContent = "Counts are too large for this teaching calculator.";
+      return;
+    }
+    const percent = (numerator, denominator) => denominator === 0
+      ? "undefined (zero denominator)"
+      : (100 * numerator / denominator).toFixed(1) + "%";
+    metricOutput.textContent = "Fictional precision: " + percent(tp, tp + fp)
+      + " | Fictional recall: " + percent(tp, tp + fn);
+  }
+  metricInputs.forEach(input => input.addEventListener("input", updateMetrics));
+  updateMetrics();
+  document.getElementById("print-guide").addEventListener("click", () => window.print());
+  let closedAnswers = [];
+  window.addEventListener("beforeprint", () => {
+    closedAnswers = [...document.querySelectorAll("details:not([open])")];
+    closedAnswers.forEach(answer => { answer.open = true; });
+  });
+  window.addEventListener("afterprint", () => {
+    closedAnswers.forEach(answer => { answer.open = false; });
+    closedAnswers = [];
+  });
+</script>
+</body>
+</html>
